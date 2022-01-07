@@ -13,7 +13,7 @@
     }
   },
   "host" : "virtserver.swaggerhub.com",
-  "basePath" : "/BraBatista/api.services.com.br/v1",
+  "basePath" : "/api.services.com.br/v1",
   "tags" : [ {
     "name" : "admins",
     "description" : "Secured Admin-only calls"
@@ -255,7 +255,7 @@
           "200" : {
             "description" : "Successful operation",
             "schema" : {
-              "$ref" : "#/definitions/Category"
+              "$ref" : "#/definitions/Service"
             }
           },
           "400" : {
@@ -499,7 +499,7 @@
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "Employee object that needs to be added",
+          "description" : "Employee object that needs to be uploaded",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Service"
@@ -540,6 +540,147 @@
           },
           "204" : {
             "description" : "No content"
+          }
+        }
+      }
+    },
+    "/customers" : {
+      "get" : {
+        "tags" : [ "customers" ],
+        "summary" : "Find all customers",
+        "description" : "Returns all customers",
+        "operationId" : "getCustomer",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Customer"
+              }
+            }
+          },
+          "204" : {
+            "description" : "No content"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "customers" ],
+        "summary" : "Add a new customer",
+        "operationId" : "addCustomer",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "customer object that needs to be added",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Customer"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created"
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/customers/{customerId}" : {
+      "get" : {
+        "tags" : [ "customers" ],
+        "summary" : "Find customer by ID",
+        "description" : "Returns a single customer",
+        "operationId" : "getCustomerById",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "customerId",
+          "in" : "path",
+          "description" : "ID of customer to return",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Customer"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Customer not found"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "customers" ],
+        "summary" : "Update an existing customer",
+        "operationId" : "updateCustomer",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "customerId",
+          "in" : "path",
+          "description" : "Customer id to update",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Customer object that needs to be updated",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Customer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation"
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Customer not found"
+          },
+          "405" : {
+            "description" : "Validation exception"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "customers" ],
+        "summary" : "Deletes a customer",
+        "operationId" : "deleteCustomer",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "customerId",
+          "in" : "path",
+          "description" : "Service id to delete",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Content deleted"
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Service not found"
           }
         }
       }
@@ -638,6 +779,51 @@
         }
       }
     },
+    "/jobs/{jobId}" : {
+      "patch" : {
+        "tags" : [ "jobs" ],
+        "summary" : "Update a status of employee",
+        "operationId" : "updateJobStatus",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "jobId",
+          "in" : "path",
+          "description" : "Employee id to update",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "Open", "Finished", "Canceled" ]
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Job object that needs to be uploaded",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Job"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation"
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Employee not found"
+          },
+          "405" : {
+            "description" : "Validation exception"
+          }
+        }
+      }
+    },
     "/payments" : {
       "post" : {
         "tags" : [ "payments" ],
@@ -680,18 +866,17 @@
     },
     "Service" : {
       "type" : "object",
-      "required" : [ "nameService" ],
       "properties" : {
-        "serviceId" : {
+        "idService" : {
           "type" : "integer",
           "format" : "int64"
-        },
-        "category" : {
-          "$ref" : "#/definitions/Category"
         },
         "nameService" : {
           "type" : "string",
           "example" : "Windows Washing"
+        },
+        "category" : {
+          "$ref" : "#/definitions/Category"
         }
       }
     },
@@ -723,13 +908,9 @@
         "city" : {
           "type" : "string"
         },
-        "userType" : {
-          "type" : "string"
-        },
         "userStatus" : {
-          "type" : "integer",
-          "format" : "int32",
-          "description" : "User Type"
+          "type" : "boolean",
+          "description" : "if user is checked"
         }
       }
     },
