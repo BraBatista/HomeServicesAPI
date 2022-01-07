@@ -316,6 +316,45 @@
           }
         }
       }
+    },
+    "/employees" : {
+      "get" : {
+        "tags" : [ "employees" ],
+        "summary" : "Find all employess",
+        "description" : "Returns all employess",
+        "operationId" : "getEmployee",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/AllEmployees"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "categories" ],
+        "summary" : "Add a new employee",
+        "operationId" : "addEmployee",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "employee object that needs to be added",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Category"
+          }
+        } ],
+        "responses" : {
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -412,8 +451,8 @@
         "user" : {
           "$ref" : "#/definitions/User"
         },
-        "pix" : {
-          "type" : "string"
+        "available" : {
+          "type" : "boolean"
         },
         "services" : {
           "type" : "array",
@@ -421,6 +460,12 @@
             "$ref" : "#/definitions/Service"
           }
         }
+      }
+    },
+    "AllEmployees" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Employee"
       }
     }
   }
