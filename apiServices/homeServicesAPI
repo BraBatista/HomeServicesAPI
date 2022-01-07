@@ -451,14 +451,34 @@
         "user" : {
           "$ref" : "#/definitions/User"
         },
-        "available" : {
-          "type" : "boolean"
-        },
         "services" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Service"
+            "type" : "object",
+            "allOf" : [ {
+              "$ref" : "#/definitions/Service"
+            }, {
+              "type" : "object",
+              "properties" : {
+                "serviceValue" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              }
+            }, {
+              "type" : "object",
+              "properties" : {
+                "serviceTime" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "description" : "Service time in minutes"
+                }
+              }
+            } ]
           }
+        },
+        "available" : {
+          "type" : "boolean"
         }
       }
     },
