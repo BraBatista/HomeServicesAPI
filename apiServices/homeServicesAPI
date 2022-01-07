@@ -30,7 +30,7 @@
       "get" : {
         "tags" : [ "categories" ],
         "summary" : "Find all categories",
-        "description" : "Returns a single category",
+        "description" : "Returns all categories",
         "operationId" : "getCategories",
         "produces" : [ "application/json" ],
         "parameters" : [ ],
@@ -38,14 +38,8 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "$ref" : "#/definitions/Category"
+              "$ref" : "#/definitions/AllCategories"
             }
-          },
-          "400" : {
-            "description" : "Invalid ID supplied"
-          },
-          "404" : {
-            "description" : "Category not found"
           }
         }
       },
@@ -110,14 +104,14 @@
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "Service id to delete",
+          "description" : "Category id to update",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "Category object that needs to be added",
+          "description" : "Category object that needs to be updated",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Category"
@@ -137,15 +131,10 @@
       },
       "delete" : {
         "tags" : [ "categories" ],
-        "summary" : "Deletes a categorie",
+        "summary" : "Deletes a category",
         "operationId" : "deleteCategory",
         "produces" : [ "application/json" ],
         "parameters" : [ {
-          "name" : "api_key",
-          "in" : "header",
-          "required" : false,
-          "type" : "string"
-        }, {
           "name" : "categoryId",
           "in" : "path",
           "description" : "Service id to delete",
@@ -166,14 +155,14 @@
     "/categories/{categoryId}/services" : {
       "get" : {
         "tags" : [ "services" ],
-        "summary" : "Returns all services from a category",
-        "description" : "Returns a map of services",
+        "summary" : "Find all services from a category",
+        "description" : "Returns all Services from especific category",
         "operationId" : "getServices",
         "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service Category id",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
@@ -182,11 +171,7 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "type" : "object",
-              "additionalProperties" : {
-                "type" : "integer",
-                "format" : "int32"
-              }
+              "$ref" : "#/definitions/AllServices"
             }
           }
         }
@@ -200,14 +185,14 @@
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service Category id",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "Service object that needs to be added to the Service",
+          "description" : "Service object that needs to be added to the Category",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Service"
@@ -230,14 +215,14 @@
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service Category id",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
         }, {
           "name" : "serviceId",
           "in" : "path",
-          "description" : "Service id to delete",
+          "description" : "Service id to return",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
@@ -252,6 +237,12 @@
                 "format" : "int32"
               }
             }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Category not found"
           }
         }
       },
@@ -264,14 +255,14 @@
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service Category id",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
         }, {
           "name" : "serviceId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service id to update",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
@@ -304,7 +295,7 @@
         "parameters" : [ {
           "name" : "categoryId",
           "in" : "path",
-          "description" : "ID of category to return",
+          "description" : "Service Category id",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
@@ -328,6 +319,18 @@
     }
   },
   "definitions" : {
+    "AllCategories" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Category"
+      }
+    },
+    "AllServices" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Service"
+      }
+    },
     "Category" : {
       "type" : "object",
       "properties" : {
@@ -383,9 +386,34 @@
           "type" : "string"
         },
         "userType" : {
+          "type" : "string"
+        },
+        "userStatus" : {
           "type" : "integer",
           "format" : "int32",
           "description" : "User Type"
+        }
+      }
+    },
+    "Customer" : {
+      "type" : "object",
+      "properties" : {
+        "user" : {
+          "$ref" : "#/definitions/User"
+        },
+        "pix" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Employee" : {
+      "type" : "object",
+      "properties" : {
+        "user" : {
+          "$ref" : "#/definitions/User"
+        },
+        "pix" : {
+          "type" : "string"
         },
         "services" : {
           "type" : "array",
