@@ -824,7 +824,7 @@
             "description" : "Invalid ID supplied"
           },
           "404" : {
-            "description" : "Employee not found"
+            "description" : "Job not found"
           },
           "405" : {
             "description" : "Validation exception"
@@ -930,6 +930,13 @@
         },
         "pix" : {
           "type" : "string"
+        },
+        "cardInfo" : {
+          "type" : "string"
+        },
+        "payType" : {
+          "type" : "string",
+          "enum" : [ "Card", "CashPix" ]
         }
       }
     },
@@ -1015,12 +1022,24 @@
         "job" : {
           "$ref" : "#/definitions/Job"
         },
+        "date" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
         "valuePaid" : {
           "type" : "number",
           "format" : "double",
           "description" : "Amount paid for the job"
+        }
+      }
+    },
+    "Route" : {
+      "type" : "object",
+      "properties" : {
+        "job" : {
+          "$ref" : "#/definitions/Job"
         },
-        "idPagSeguro" : {
+        "googleMapsInfo" : {
           "type" : "string"
         }
       }
