@@ -648,51 +648,6 @@
         }
       }
     },
-    "/users/{userId}" : {
-      "patch" : {
-        "tags" : [ "users" ],
-        "summary" : "Update a status of user",
-        "operationId" : "updateUserStatus",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "userId",
-          "in" : "path",
-          "description" : "User id to update",
-          "required" : true,
-          "type" : "integer",
-          "format" : "int64"
-        }, {
-          "name" : "userStatus",
-          "in" : "query",
-          "description" : "a new value to user status",
-          "required" : false,
-          "type" : "boolean"
-        }, {
-          "in" : "body",
-          "name" : "body",
-          "description" : "Employee object that needs to be uploaded",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/User"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Successful operation"
-          },
-          "400" : {
-            "description" : "Invalid ID supplied"
-          },
-          "404" : {
-            "description" : "Employee not found"
-          },
-          "405" : {
-            "description" : "Validation exception"
-          }
-        }
-      }
-    },
     "/jobs" : {
       "post" : {
         "tags" : [ "jobs" ],
@@ -756,7 +711,7 @@
     "/jobs/customer/{customerId}" : {
       "get" : {
         "tags" : [ "jobs" ],
-        "summary" : "Find job by employee ID",
+        "summary" : "Find jobs by employee ID",
         "description" : "Returns a job of the employee",
         "operationId" : "getJobByCustomerId",
         "produces" : [ "application/json" ],
@@ -782,7 +737,7 @@
             "description" : "Invalid ID supplied"
           },
           "404" : {
-            "description" : "Employee not found"
+            "description" : "Job not found"
           }
         }
       }
@@ -790,14 +745,14 @@
     "/jobs/{jobId}" : {
       "patch" : {
         "tags" : [ "jobs" ],
-        "summary" : "Update a status of employee",
+        "summary" : "Update a status of job",
         "operationId" : "updateJobStatus",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "jobId",
           "in" : "path",
-          "description" : "Employee id to update",
+          "description" : "Job id to update",
           "required" : true,
           "type" : "integer",
           "format" : "int64"
@@ -806,7 +761,13 @@
           "in" : "query",
           "required" : false,
           "type" : "string",
-          "enum" : [ "Requested", "Confirmed", "Executing", "Finished", "Canceled" ]
+          "enum" : [ "Requested", "Confirmed", "Executing", "Executed", "Finished", "Canceled" ]
+        }, {
+          "name" : "rate",
+          "in" : "query",
+          "required" : false,
+          "type" : "integer",
+          "format" : "int32"
         }, {
           "in" : "body",
           "name" : "body",
@@ -854,6 +815,739 @@
           },
           "405" : {
             "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/maps" : {
+      "get" : {
+        "tags" : [ "routes" ],
+        "summary" : "Get the user location",
+        "operationId" : "getUserLocation",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "address",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "key",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "The user location is displayed",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Location"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created"
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/auth/token" : {
+      "post" : {
+        "tags" : [ "auth" ],
+        "summary" : "Create a new authentication token (JWT) for the requesting client",
+        "description" : "Create a new authentication token (JWT) for the requesting client, signed by the server.\n\nThe operation must succeed only if the credentials correspond to an user which already registered to the system.\nNo token should be created otherwise.\n",
+        "operationId" : "createToken",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/jwt" ],
+        "parameters" : [ {
+          "name" : "duration",
+          "in" : "query",
+          "description" : "The duration of the token, in __seconds__\nThis implies the generated token will be valid for `duration` minutes after its creation time (i.e. the time contained within the `iat` claim)\n",
+          "required" : false,
+          "type" : "number",
+          "format" : "int"
+        }, {
+          "in" : "body",
+          "name" : "credentials",
+          "description" : "A description of the user to be authenticated.\n\nIt must contain at least:\n- an identifier for the user (`id`, `email`, or `username`)\n- its `password`\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The new token has been created and returned",
+            "schema" : {
+              "type" : "string",
+              "description" : "A `base64url`-encoded JSON web token",
+              "example" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `credentials` parameter is ill-formed or it doesn't contain some fields which are required instead\n"
+          },
+          "401" : {
+            "description" : "The credentials are wrong\n"
+          },
+          "404" : {
+            "description" : "No such a user exists\n"
+          }
+        }
+      }
+    },
+    "/users" : {
+      "get" : {
+        "tags" : [ "users" ],
+        "summary" : "Retrieve all the users",
+        "description" : "Retrieve all the users. Only `admin`s can do it.\n",
+        "operationId" : "readAllUsers",
+        "schemes" : [ "http" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "skip",
+          "in" : "query",
+          "description" : "Optional parameter stating the amount of sub-resources to be skipped in a bulk query. Defaults to 0",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Optional parameter stating the maximum amount of sub-resources to be returned by a bulk query. Defaults to 10",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Optional parameter constraining the bulk query to return only those sub-resources whose representation contains this value. Defaults to the empty string",
+          "required" : false,
+          "type" : "string",
+          "default" : "<empty string>"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.\nNotice that, for each user, only a minimal subset of fields may be returned (i.e. the `link`)\n",
+            "schema" : {
+              "$ref" : "#/definitions/ListOfUsers"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `skip` and/or `limit` parameters are not valid integers"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "users" ],
+        "summary" : "Create a new user",
+        "description" : "Create a new user. Any client can do it, there including unlogged users.\n\nNew users are registered with the `user` role by default.\nOnly `admin`s can create new users with the `admin` role.\n",
+        "operationId" : "createUser",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "userData",
+          "description" : "A description of the user to be created.\n\nThe `id` and `link` fields must be undefined.\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The new user has been created and its link returned",
+            "schema" : {
+              "$ref" : "#/definitions/Link"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `userData` parameter is ill-formed or it contains some fields which should be undefined instead\n"
+          },
+          "409" : {
+            "description" : "Conflict. A user with the same username or email address already exists\n"
+          }
+        }
+      }
+    },
+    "/users/{userId}" : {
+      "get" : {
+        "tags" : [ "users" ],
+        "summary" : "Retrieves a particular user",
+        "description" : "Retrieves the data of a particular user.\n\nBoth `user`s and `admin` can do it.\n",
+        "operationId" : "readUser",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "User id to update",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. An object is returned containing the user's data",
+            "schema" : {
+              "$ref" : "#/definitions/User"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "users" ],
+        "summary" : "Edit an existing user",
+        "description" : "Edit an existing user. Only that particular user can do it Only the to-be-updated fields need to be specified within the input object.\n",
+        "operationId" : "updateUser",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "User id to update",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "in" : "body",
+          "name" : "newUserData",
+          "description" : "A data structure containing the new values of the fields to be updated.\n\nThe `id` and `link` fields must be null since they cannot be updated.\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The user has been edited and its novel representation returned.\n",
+            "schema" : {
+              "$ref" : "#/definitions/User"
+            }
+          },
+          "400" : {
+            "description" : "Bad request: the users UUIDs cannot be edited\n"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "users" ],
+        "summary" : "Update a status of user",
+        "operationId" : "updateUserStatus",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "User id to update",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "name" : "userStatus",
+          "in" : "query",
+          "description" : "a new value to user status",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Employee object that needs to be uploaded",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation"
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Employee not found"
+          },
+          "405" : {
+            "description" : "Validation exception"
+          }
+        }
+      }
+    },
+    "/rooms" : {
+      "get" : {
+        "tags" : [ "rooms" ],
+        "summary" : "Retrieves all chat rooms",
+        "description" : "Retrieves all chat rooms.\nEvery body can do it.\n\nSince the list of existing chat rooms can be long, clients can retrieve\nportions of it by means of the `skip`, or `limit` query parametes.\n\nFinally, chat rooms can be searched by means of the `filter` query parameter.\n",
+        "operationId" : "readAllChatRooms",
+        "schemes" : [ "http" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "skip",
+          "in" : "query",
+          "description" : "Optional parameter stating the amount of sub-resources to be skipped in a bulk query. Defaults to 0",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Optional parameter stating the maximum amount of sub-resources to be returned by a bulk query. Defaults to 10",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Optional parameter constraining the bulk query to return only those sub-resources whose representation contains this value. Defaults to the empty string",
+          "required" : false,
+          "type" : "string",
+          "default" : "<empty string>"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.\nNotice that, for each ChatRoom, only a minimal subset of fields may be returned (i.e., `link`)\n",
+            "schema" : {
+              "$ref" : "#/definitions/ListOfChatRooms"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `skip` and/or `limit` parameters are not valid integers"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "rooms" ],
+        "summary" : "Create a new chat room",
+        "description" : "Create a new chat room.\nEvery logged user can do that, implicitly becoming the owner of the new room.\n\nIf the user is an `admin`, then he/she is able to create chat rooms that are owned by other users.\nOtherwise, the owner filed of the request's body must either be undefined or correspond to the requestor.\nThe requestor can specify an initial set of members for the chat room other than its access level.\nHe/she cannot specify any initial message, so the corresponding fields of the body must remain unset.\n",
+        "operationId" : "createChatRoom",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "chatRoom",
+          "description" : "A description for the chat room to be created.\nThe `owner` field may remain unspecified or it can simply contain the minimal set of fields necessary to identify the owner user (e.g. his/her `id`, `email`, or `username`).\nSimilarly, the `members` field may remain unspecified or it can simply contain a list of users, each one in turn containin the minimal setof fields necessary to identify him/her.\nThe `messageCount`, `membersCount`, `messages`, and `link` fields must remain unspecified.\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/ChatRoom"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. The chat room was successfully created. The link to the newly created chat room is returned",
+            "schema" : {
+              "$ref" : "#/definitions/Link"
+            }
+          },
+          "400" : {
+            "description" : "Bad request: the provided chat room is violating some contraint\n"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. one or more of the specified members are not registered users.\n"
+          },
+          "409" : {
+            "description" : "Conflict. A chat room with the same name already exists.\n"
+          }
+        }
+      }
+    },
+    "/rooms/{chatRoomName}" : {
+      "get" : {
+        "tags" : [ "rooms" ],
+        "summary" : "Retrieve a particular chat room",
+        "description" : "Retrieve a particular chat room, there including some metadata, some messages and some members. The returned messages are chronologically ordered from the most recent to the oldest one.\nAdmins can retrieve the data of any chat room.\nUsers can only retrieve the data of the chat rooms they own or they are member of.\nUnlogged clients can only retrieve the data of public chat rooms.\n",
+        "operationId" : "readChatRoom",
+        "schemes" : [ "http" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "limitMessages",
+          "in" : "query",
+          "description" : "Maximum amount of messages to be returned along with the chat room metadata (only the most recent messages are returned)",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        }, {
+          "name" : "limitMembers",
+          "in" : "query",
+          "description" : "Maximum amount of members to be returned",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success.\nNotice that, for each user returned along with the chat room metadata, only a minimal subset of fields may be actually specified (i.e. the `link`)\n",
+            "schema" : {
+              "$ref" : "#/definitions/ChatRoom"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided limitMessages and/or limitMembers parameters are not valid integers\n"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "rooms" ],
+        "summary" : "Delete a particular chat room",
+        "description" : "Delete a particular chat room, along with all its messages. Admins can delete any chat room. Users can only delete a chat room if they own it.\n",
+        "operationId" : "deleteChatRoom",
+        "schemes" : [ "http" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "The chat room was successfully deleted."
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      }
+    },
+    "/rooms/{chatRoomName}/members" : {
+      "get" : {
+        "tags" : [ "members" ],
+        "summary" : "Retrieve the members of a particular chat room",
+        "description" : "Retrieve the members of a particular chat room. Admins can always retrieve the members of any chat room. Users can do so only if they own the chat room or they are part of the members.\n",
+        "operationId" : "readChatRoomMembers",
+        "schemes" : [ "http" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "skip",
+          "in" : "query",
+          "description" : "Optional parameter stating the amount of sub-resources to be skipped in a bulk query. Defaults to 0",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Optional parameter stating the maximum amount of sub-resources to be returned by a bulk query. Defaults to 10",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Optional parameter constraining the bulk query to return only those sub-resources whose representation contains this value. Defaults to the empty string",
+          "required" : false,
+          "type" : "string",
+          "default" : "<empty string>"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "schema" : {
+              "$ref" : "#/definitions/ListOfUsers"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `skip` and/or `limit` parameters are not valid integers"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "members" ],
+        "summary" : "Add a member to a particular chat room",
+        "description" : "Add a member to a particular chat room. `admin`s can always add members to any chat room. A `user` can only add members to a chat room if he/she own it. `user`s which are not onwning a chat room can only add themselves, and only if the chat room is not private.\n",
+        "operationId" : "createChatRoomMember",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "member",
+          "description" : "The member to be added.\nIt is sufficient to specify the minimal set of fields making the user identifiable (e.g. `id`, `email`, or `username`)\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Success. The user was successfully added to the members set of this chat room.\n"
+          },
+          "400" : {
+            "description" : "Bad request: the provided members fields are badly filled.\n"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          },
+          "409" : {
+            "description" : "Conflict. The user is already a member of the chat room.\n"
+          }
+        }
+      }
+    },
+    "/rooms/{chatRoomName}/members/{memberId}" : {
+      "delete" : {
+        "tags" : [ "members" ],
+        "summary" : "Delete a particular member of a particular chat room",
+        "description" : "Delete a particular member of a particular chat room. `admin`s can always do it. `user`s can do it only if they own the chat room. Other `user`s can only delete them selves.\n",
+        "operationId" : "deleteChatRoomMember",
+        "schemes" : [ "http" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "memberId",
+          "in" : "path",
+          "description" : "The chat room member's identifier (i.e. the identifier of the corresponding user)",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "The member was successfully deleted from the chat room"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      }
+    },
+    "/rooms/{chatRoomName}/messages" : {
+      "get" : {
+        "tags" : [ "messages" ],
+        "summary" : "Retrieve the messages of a particular chat room",
+        "description" : "Retrieve the messages of a particular chat room. `admin`s can always do that. `user`s can do it only if they are members of the chat room or they own it. Unlogged clients can do it only if the chat room is public.\nThe amount of returned messages can only be regulated by means of the query parameters.\n",
+        "operationId" : "readChatRoomMessages",
+        "schemes" : [ "http" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Optional parameter stating the maximum amount of sub-resources to be returned by a bulk query. Defaults to 10",
+          "required" : false,
+          "type" : "integer",
+          "default" : 10
+        }, {
+          "name" : "skip",
+          "in" : "query",
+          "description" : "Optional parameter stating the amount of sub-resources to be skipped in a bulk query. Defaults to 0",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Optional parameter constraining the bulk query to return only those sub-resources whose representation contains this value. Defaults to the empty string",
+          "required" : false,
+          "type" : "string",
+          "default" : "<empty string>"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success. A list of messages is returned and the messages are chronologically ordered from the most  recent one to the oldest one.\nFor each message, the `sender` object may only contain the minimal set of fields necessary to identify the sender (i.e. `id`, `username`, or `email`).\n",
+            "schema" : {
+              "$ref" : "#/definitions/ListOfMessages"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `skip` and/or `limit` parameters are not valid integers"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "messages" ],
+        "summary" : "Add a message to a particular chat room",
+        "description" : "Add a message to a particular chat room. Only members, owners, or `admin`s can do it.\n",
+        "operationId" : "createChatRoomMessage",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "newMessage",
+          "description" : "A description of the message to be published on the chat room.\nThe `sender` object can only contain the minimal set of fields necessary to identify the sender (i.e. `id`, `username`, or `email`)\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/ChatMessage"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success: the message was successfully published\n",
+            "schema" : {
+              "$ref" : "#/definitions/ChatMessage"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. Badly formatted message or more field than necessary have been provided"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
+          }
+        }
+      }
+    },
+    "/rooms/{chatRoomName}/messages/stream" : {
+      "get" : {
+        "tags" : [ "messages" ],
+        "summary" : "Open a web-socket connection for downloading a sequence of messages",
+        "description" : "Open a web-socket connection for downloading a sequence of messages.\n`admin`s can always do that.\n`user`s can do it only if they are members of the chat room or they own it.\nUnlogged clients can do it only if the chat room is public.\n\nThe stream will include all massages published within the chat room, starting from the one with index equals to the `skip` parameter.\n\nMessages must be represented using the MIME type specified the request's `ACCEPT` header.\n\nAs long as the connection is alive, new messages published within the chat room will be included in the stream.\nThis includes messages published AFTER the connection was opened.\nOnly the client can close the stream, by closing the corresponding connection.\n",
+        "operationId" : "openMessageStream",
+        "schemes" : [ "ws" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "chatRoomName",
+          "in" : "path",
+          "description" : "The chat room name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "skip",
+          "in" : "query",
+          "description" : "Optional parameter stating the amount of sub-resources to be skipped in a bulk query. Defaults to 0",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0
+        } ],
+        "responses" : {
+          "101" : {
+            "description" : "Success. The WS connection has been established\n"
+          },
+          "default" : {
+            "description" : "Each element of the stream will be of the `CHatMessage` type\n",
+            "schema" : {
+              "$ref" : "#/definitions/ChatMessage"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. The provided `skip` and/or `limit` parameters are not valid integers"
+          },
+          "401" : {
+            "description" : "Unauthorized. Authentication credentials is not sufficient to authenticate the requesting client"
+          },
+          "403" : {
+            "description" : "Forbidden.\nAuthentication is successful but authorization is not.\nThe authenticated client may not have the right to access the resource(s)\n"
+          },
+          "404" : {
+            "description" : "Not found. The provided identifier for the sub-resource is invalid\n"
           }
         }
       }
@@ -908,7 +1602,8 @@
           "type" : "string"
         },
         "password" : {
-          "type" : "string"
+          "type" : "string",
+          "format" : "password"
         },
         "phone" : {
           "type" : "string"
@@ -980,6 +1675,17 @@
     "Job" : {
       "type" : "object",
       "properties" : {
+        "idJob" : {
+          "type" : "integer"
+        },
+        "dateJob" : {
+          "type" : "string",
+          "format" : "date"
+        },
+        "code" : {
+          "type" : "integer",
+          "description" : "generated code to finish job"
+        },
         "customer" : {
           "$ref" : "#/definitions/Customer"
         },
@@ -996,7 +1702,7 @@
         },
         "status" : {
           "type" : "string",
-          "enum" : [ "Requested", "Confirmed", "Executing", "Finished", "Canceled" ]
+          "enum" : [ "Requested", "Confirmed", "Executing", "Executed", "Finished", "Canceled" ]
         }
       }
     },
@@ -1033,15 +1739,96 @@
         }
       }
     },
-    "Route" : {
+    "Location" : {
       "type" : "object",
       "properties" : {
-        "job" : {
-          "$ref" : "#/definitions/Job"
+        "lat" : {
+          "type" : "number",
+          "format" : "double"
         },
-        "googleMapsInfo" : {
-          "type" : "string"
+        "lng" : {
+          "type" : "number",
+          "format" : "double"
         }
+      }
+    },
+    "Link" : {
+      "type" : "string",
+      "format" : "url",
+      "example" : "www.example.com/web-chat/v1/resourceSet/resourceName"
+    },
+    "ListOfUsers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/User"
+      }
+    },
+    "ChatMessage" : {
+      "type" : "object",
+      "properties" : {
+        "chatRoom" : {
+          "$ref" : "#/definitions/Link"
+        },
+        "index" : {
+          "type" : "integer"
+        },
+        "sender" : {
+          "$ref" : "#/definitions/User"
+        },
+        "content" : {
+          "type" : "string"
+        },
+        "timestamp" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      }
+    },
+    "ListOfMessages" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ChatMessage"
+      }
+    },
+    "ChatRoom" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "comics"
+        },
+        "owner" : {
+          "$ref" : "#/definitions/User"
+        },
+        "members" : {
+          "$ref" : "#/definitions/ListOfUsers"
+        },
+        "membersCount" : {
+          "type" : "integer"
+        },
+        "messages" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ListOfMessages"
+          }
+        },
+        "messagesCount" : {
+          "type" : "integer"
+        },
+        "accessLevel" : {
+          "type" : "string",
+          "example" : "public",
+          "enum" : [ "public", "open", "closed" ]
+        },
+        "link" : {
+          "$ref" : "#/definitions/Link"
+        }
+      }
+    },
+    "ListOfChatRooms" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ChatRoom"
       }
     }
   }
